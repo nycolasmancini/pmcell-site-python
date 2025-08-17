@@ -1,0 +1,4 @@
+# PMCELL Catálogo - Requirements Root
+# Este arquivo redireciona para o backend
+
+-r backend/requirements.txt
