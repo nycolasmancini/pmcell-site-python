@@ -15,8 +15,39 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+from django.http import JsonResponse
+
+def health_check(request):
+    """Health check endpoint para Railway"""
+    return JsonResponse({
+        'status': 'healthy',
+        'app': 'PMCELL Catálogo Backend',
+        'version': '1.0.0'
+    })
+
+def api_root(request):
+    """API root endpoint"""
+    return JsonResponse({
+        'message': 'PMCELL Catálogo API',
+        'version': '1.0.0',
+        'endpoints': {
+            'admin': '/admin/',
+            'api': '/api/',
+            'health': '/health/',
+        }
+    })
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('health/', health_check, name='health_check'),
+    path('api/', api_root, name='api_root'),
+    path('', api_root, name='root'),
 ]
+
+# Servir arquivos estáticos e media em desenvolvimento
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
