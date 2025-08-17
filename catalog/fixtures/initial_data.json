@@ -1,0 +1,429 @@
+[
+  {
+    "model": "catalog.categoria",
+    "pk": 1,
+    "fields": {
+      "nome": "Cabos",
+      "slug": "cabos",
+      "descricao": "Cabos USB, tipo C, Lightning e outros",
+      "ativo": true,
+      "ordem": 1,
+      "created_at": "2025-08-17T12:00:00Z"
+    }
+  },
+  {
+    "model": "catalog.categoria",
+    "pk": 2,
+    "fields": {
+      "nome": "Carregadores",
+      "slug": "carregadores",
+      "descricao": "Carregadores de tomada, veiculares e sem fio",
+      "ativo": true,
+      "ordem": 2,
+      "created_at": "2025-08-17T12:00:00Z"
+    }
+  },
+  {
+    "model": "catalog.categoria",
+    "pk": 3,
+    "fields": {
+      "nome": "Fones de Ouvido",
+      "slug": "fones-de-ouvido",
+      "descricao": "Fones com fio e sem fio",
+      "ativo": true,
+      "ordem": 3,
+      "created_at": "2025-08-17T12:00:00Z"
+    }
+  },
+  {
+    "model": "catalog.categoria",
+    "pk": 4,
+    "fields": {
+      "nome": "Capas",
+      "slug": "capas",
+      "descricao": "Capas para diversos modelos de celular",
+      "ativo": true,
+      "ordem": 4,
+      "created_at": "2025-08-17T12:00:00Z"
+    }
+  },
+  {
+    "model": "catalog.categoria",
+    "pk": 5,
+    "fields": {
+      "nome": "Películas",
+      "slug": "peliculas",
+      "descricao": "Películas protetoras para tela",
+      "ativo": true,
+      "ordem": 5,
+      "created_at": "2025-08-17T12:00:00Z"
+    }
+  },
+  {
+    "model": "catalog.categoria",
+    "pk": 6,
+    "fields": {
+      "nome": "Acessórios",
+      "slug": "acessorios",
+      "descricao": "Suportes, power banks e outros acessórios",
+      "ativo": true,
+      "ordem": 6,
+      "created_at": "2025-08-17T12:00:00Z"
+    }
+  },
+  {
+    "model": "catalog.marcacelular",
+    "pk": 1,
+    "fields": {
+      "nome": "Apple",
+      "slug": "apple",
+      "ativo": true,
+      "ordem": 1
+    }
+  },
+  {
+    "model": "catalog.marcacelular",
+    "pk": 2,
+    "fields": {
+      "nome": "Samsung",
+      "slug": "samsung",
+      "ativo": true,
+      "ordem": 2
+    }
+  },
+  {
+    "model": "catalog.marcacelular",
+    "pk": 3,
+    "fields": {
+      "nome": "Xiaomi",
+      "slug": "xiaomi",
+      "ativo": true,
+      "ordem": 3
+    }
+  },
+  {
+    "model": "catalog.marcacelular",
+    "pk": 4,
+    "fields": {
+      "nome": "Motorola",
+      "slug": "motorola",
+      "ativo": true,
+      "ordem": 4
+    }
+  },
+  {
+    "model": "catalog.modelocelular",
+    "pk": 1,
+    "fields": {
+      "marca": 1,
+      "nome": "iPhone 14",
+      "slug": "iphone-14",
+      "ativo": true,
+      "ordem": 1
+    }
+  },
+  {
+    "model": "catalog.modelocelular",
+    "pk": 2,
+    "fields": {
+      "marca": 1,
+      "nome": "iPhone 14 Pro",
+      "slug": "iphone-14-pro",
+      "ativo": true,
+      "ordem": 2
+    }
+  },
+  {
+    "model": "catalog.modelocelular",
+    "pk": 3,
+    "fields": {
+      "marca": 1,
+      "nome": "iPhone 15",
+      "slug": "iphone-15",
+      "ativo": true,
+      "ordem": 3
+    }
+  },
+  {
+    "model": "catalog.modelocelular",
+    "pk": 4,
+    "fields": {
+      "marca": 2,
+      "nome": "Galaxy S24",
+      "slug": "galaxy-s24",
+      "ativo": true,
+      "ordem": 1
+    }
+  },
+  {
+    "model": "catalog.modelocelular",
+    "pk": 5,
+    "fields": {
+      "marca": 2,
+      "nome": "Galaxy A54",
+      "slug": "galaxy-a54",
+      "ativo": true,
+      "ordem": 2
+    }
+  },
+  {
+    "model": "catalog.produtonormal",
+    "pk": 1,
+    "fields": {
+      "nome": "Cabo USB-C 1 Metro",
+      "slug": "cabo-usb-c-1-metro",
+      "descricao": "Cabo USB-C para carregamento e transferência de dados",
+      "categoria": 1,
+      "fabricante": "PMCELL",
+      "caracteristicas": "Comprimento: 1 metro\nMaterial: Nylon trançado\nCertificação: USB-IF",
+      "em_estoque": true,
+      "destaque": false,
+      "quantidade_super_atacado": 50,
+      "preco_atacado": "12.50",
+      "preco_super_atacado": "10.00",
+      "created_at": "2025-08-17T12:00:00Z",
+      "updated_at": "2025-08-17T12:00:00Z"
+    }
+  },
+  {
+    "model": "catalog.produtonormal",
+    "pk": 2,
+    "fields": {
+      "nome": "Carregador Turbo 20W",
+      "slug": "carregador-turbo-20w",
+      "descricao": "Carregador de tomada com tecnologia de carregamento rápido",
+      "categoria": 2,
+      "fabricante": "PMCELL",
+      "caracteristicas": "Potência: 20W\nEntrada: 100-240V\nSaída: 5V/3A, 9V/2.22A, 12V/1.67A\nTecnologia: PD + QC",
+      "em_estoque": true,
+      "destaque": true,
+      "quantidade_super_atacado": 30,
+      "preco_atacado": "25.00",
+      "preco_super_atacado": "20.00",
+      "created_at": "2025-08-17T12:00:00Z",
+      "updated_at": "2025-08-17T12:00:00Z"
+    }
+  },
+  {
+    "model": "catalog.produtonormal",
+    "pk": 3,
+    "fields": {
+      "nome": "Fone Bluetooth TWS",
+      "slug": "fone-bluetooth-tws",
+      "descricao": "Fone de ouvido sem fio com estojo carregador",
+      "categoria": 3,
+      "fabricante": "PMCELL",
+      "caracteristicas": "Conexão: Bluetooth 5.0\nAutonomia: 6h + 24h (estojo)\nResistência: IPX4\nControlé por toque",
+      "em_estoque": true,
+      "destaque": true,
+      "quantidade_super_atacado": 20,
+      "preco_atacado": "45.00",
+      "preco_super_atacado": "38.00",
+      "created_at": "2025-08-17T12:00:00Z",
+      "updated_at": "2025-08-17T12:00:00Z"
+    }
+  },
+  {
+    "model": "catalog.produtocapapelicula",
+    "pk": 1,
+    "fields": {
+      "nome": "Capa Transparente Premium",
+      "slug": "capa-transparente-premium",
+      "descricao": "Capa transparente com proteção anti-impacto",
+      "categoria": 4,
+      "fabricante": "PMCELL",
+      "caracteristicas": "Material: TPU premium\nTransparência total\nProteção contra quedas\nRecortes perfeitos",
+      "em_estoque": true,
+      "destaque": true,
+      "quantidade_super_atacado": 25,
+      "created_at": "2025-08-17T12:00:00Z",
+      "updated_at": "2025-08-17T12:00:00Z"
+    }
+  },
+  {
+    "model": "catalog.produtocapapelicula",
+    "pk": 2,
+    "fields": {
+      "nome": "Película de Vidro 9H",
+      "slug": "pelicula-vidro-9h",
+      "descricao": "Película de vidro temperado com dureza 9H",
+      "categoria": 5,
+      "fabricante": "PMCELL",
+      "caracteristicas": "Dureza: 9H\nEspessura: 0.3mm\nTransparência: 99%\nOleofóbica e anti-riscos",
+      "em_estoque": true,
+      "destaque": false,
+      "quantidade_super_atacado": 40,
+      "created_at": "2025-08-17T12:00:00Z",
+      "updated_at": "2025-08-17T12:00:00Z"
+    }
+  },
+  {
+    "model": "catalog.precomodelo",
+    "pk": 1,
+    "fields": {
+      "produto": 1,
+      "modelo": 1,
+      "preco_atacado": "18.00",
+      "preco_super_atacado": "15.00",
+      "ativo": true
+    }
+  },
+  {
+    "model": "catalog.precomodelo",
+    "pk": 2,
+    "fields": {
+      "produto": 1,
+      "modelo": 2,
+      "preco_atacado": "20.00",
+      "preco_super_atacado": "17.00",
+      "ativo": true
+    }
+  },
+  {
+    "model": "catalog.precomodelo",
+    "pk": 3,
+    "fields": {
+      "produto": 1,
+      "modelo": 3,
+      "preco_atacado": "22.00",
+      "preco_super_atacado": "19.00",
+      "ativo": true
+    }
+  },
+  {
+    "model": "catalog.precomodelo",
+    "pk": 4,
+    "fields": {
+      "produto": 1,
+      "modelo": 4,
+      "preco_atacado": "16.00",
+      "preco_super_atacado": "13.00",
+      "ativo": true
+    }
+  },
+  {
+    "model": "catalog.precomodelo",
+    "pk": 5,
+    "fields": {
+      "produto": 1,
+      "modelo": 5,
+      "preco_atacado": "14.00",
+      "preco_super_atacado": "11.00",
+      "ativo": true
+    }
+  },
+  {
+    "model": "catalog.precomodelo",
+    "pk": 6,
+    "fields": {
+      "produto": 2,
+      "modelo": 1,
+      "preco_atacado": "12.00",
+      "preco_super_atacado": "10.00",
+      "ativo": true
+    }
+  },
+  {
+    "model": "catalog.precomodelo",
+    "pk": 7,
+    "fields": {
+      "produto": 2,
+      "modelo": 2,
+      "preco_atacado": "14.00",
+      "preco_super_atacado": "12.00",
+      "ativo": true
+    }
+  },
+  {
+    "model": "catalog.precomodelo",
+    "pk": 8,
+    "fields": {
+      "produto": 2,
+      "modelo": 3,
+      "preco_atacado": "16.00",
+      "preco_super_atacado": "14.00",
+      "ativo": true
+    }
+  },
+  {
+    "model": "catalog.precomodelo",
+    "pk": 9,
+    "fields": {
+      "produto": 2,
+      "modelo": 4,
+      "preco_atacado": "10.00",
+      "preco_super_atacado": "8.00",
+      "ativo": true
+    }
+  },
+  {
+    "model": "catalog.precomodelo",
+    "pk": 10,
+    "fields": {
+      "produto": 2,
+      "modelo": 5,
+      "preco_atacado": "8.00",
+      "preco_super_atacado": "6.00",
+      "ativo": true
+    }
+  },
+  {
+    "model": "catalog.configuracaowebhook",
+    "pk": 1,
+    "fields": {
+      "evento": "liberacao_preco",
+      "url": "https://webhook.site/#!/view/your-webhook-url-here",
+      "ativo": false,
+      "timeout": 30,
+      "retry_ativo": true,
+      "created_at": "2025-08-17T12:00:00Z",
+      "updated_at": "2025-08-17T12:00:00Z"
+    }
+  },
+  {
+    "model": "catalog.configuracaowebhook",
+    "pk": 2,
+    "fields": {
+      "evento": "carrinho_abandonado",
+      "url": "https://webhook.site/#!/view/your-webhook-url-here",
+      "ativo": false,
+      "timeout": 30,
+      "retry_ativo": true,
+      "created_at": "2025-08-17T12:00:00Z",
+      "updated_at": "2025-08-17T12:00:00Z"
+    }
+  },
+  {
+    "model": "catalog.configuracaowebhook",
+    "pk": 3,
+    "fields": {
+      "evento": "pedido_finalizado",
+      "url": "https://webhook.site/#!/view/your-webhook-url-here",
+      "ativo": false,
+      "timeout": 30,
+      "retry_ativo": true,
+      "created_at": "2025-08-17T12:00:00Z",
+      "updated_at": "2025-08-17T12:00:00Z"
+    }
+  },
+  {
+    "model": "catalog.configuracaogeral",
+    "pk": 1,
+    "fields": {
+      "chave": "tempo_abandono_carrinho",
+      "valor": "30",
+      "descricao": "Tempo em minutos para considerar carrinho abandonado",
+      "updated_at": "2025-08-17T12:00:00Z"
+    }
+  },
+  {
+    "model": "catalog.configuracaogeral",
+    "pk": 2,
+    "fields": {
+      "chave": "cookie_liberacao_preco",
+      "valor": "7",
+      "descricao": "Dias para manter cookie de liberação de preços",
+      "updated_at": "2025-08-17T12:00:00Z"
+    }
+  }
+]
