@@ -1,0 +1,8 @@
+[build]
+cmd = "pip install -r requirements.txt && python manage.py collectstatic --noinput"
+
+[start]
+cmd = "python manage.py migrate && gunicorn pmcell.wsgi:application"
+
+[variables]
+NIXPACKS_PYTHON_VERSION = "3.11"
