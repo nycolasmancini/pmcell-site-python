@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Carrinho - PMCELL{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="cartManager()" x-init="loadCart()">
+    
+    <h1 class="text-2xl font-bold text-gray-900 mb-8">Carrinho de Compras</h1>
+
+    <!-- Loading State -->
+    <div x-show="loading" class="text-center py-12">
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
+        <p class="mt-2 text-gray-600">Carregando carrinho...</p>
+    </div>
+
+    <!-- Cart Items -->
+    <div x-show="!loading && cartItems.length > 0" style="display: none;">
+        <div class="bg-white rounded-lg shadow-md">
+            <!-- Cart Header -->
+            <div class="p-6 border-b border-gray-200">
+                <div class="grid grid-cols-12 gap-4 text-sm font-medium text-gray-700">
+                    <div class="col-span-6">Produto</div>
+                    <div class="col-span-2 text-center">Quantidade</div>
+                    <div class="col-span-2 text-center">Preço Unit.</div>
+                    <div class="col-span-2 text-center">Total</div>
+                </div>
+            </div>
+
+            <!-- Cart Items List -->
+            <div class="divide-y divide-gray-200">
+                <template x-for="item in cartItems" :key="item.key">
+                    <div class="p-6">
+                        <div class="grid grid-cols-12 gap-4 items-center">
+                            <!-- Product Info -->
+                            <div class="col-span-6">
+                                <div class="flex items-center space-x-4">
+                                    <img :src="item.image || '/static/images/placeholder.png'" 
+                                         :alt="item.name"
+                                         class="w-16 h-16 object-cover rounded-lg">
+                                    <div>
+                                        <h3 class="font-medium text-gray-900" x-text="item.name"></h3>
+                                        <p class="text-sm text-gray-500" x-text="item.category"></p>
+                                        <p x-show="item.modelName" class="text-xs text-blue-600" x-text="'Modelo: ' + item.modelName"></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Quantity Controls -->
+                            <div class="col-span-2 text-center">
+                                <div class="flex items-center justify-center space-x-2">
+                                    <button @click="updateQuantity(item.key, item.quantity - 1)"
+                                            class="quantity-btn">-</button>
+                                    <span x-text="item.quantity" class="w-8 text-center font-medium"></span>
+                                    <button @click="updateQuantity(item.key, item.quantity + 1)"
+                                            class="quantity-btn">+</button>
+                                </div>
+                            </div>
+
+                            <!-- Unit Price -->
+                            <div class="col-span-2 text-center">
+                                <span x-text="formatPrice(item.unitPrice)" class="font-medium"></span>
+                                <div x-show="item.isSuperAtacado" class="text-xs text-blue-600">
+                                    Super Atacado
+                                </div>
+                                <div x-show="!item.isSuperAtacado && item.quantity >= item.minQuantitySuper" 
+                                     class="text-xs text-orange-600">
+                                    <span x-text="item.minQuantitySuper"></span>+ = <span x-text="formatPrice(item.priceSuperAtacado)"></span>
+                                </div>
+                            </div>
+
+                            <!-- Total Price -->
+                            <div class="col-span-2 text-center">
+                                <span x-text="formatPrice(item.unitPrice * item.quantity)" class="font-bold"></span>
+                                <button @click="removeItem(item.key)" 
+                                        class="block mx-auto mt-1 text-red-500 hover:text-red-700 text-sm">
+                                    Remover
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Cart Summary -->
+            <div class="p-6 bg-gray-50 border-t border-gray-200">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-lg font-medium">Total:</span>
+                    <span x-text="formatPrice(cartTotal)" class="text-2xl font-bold text-orange-600"></span>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="{% url 'catalog:home' %}" 
+                       class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded-lg text-center font-medium transition-colors">
+                        Continuar Comprando
+                    </a>
+                    <button @click="proceedToCheckout()" 
+                            class="flex-1 btn-pmcell px-6 py-3">
+                        Finalizar Pedido
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty Cart -->
+    <div x-show="!loading && cartItems.length === 0" class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M3 3h2l.4 2M7 13h10l4-8H5.4m2.6 0L9 17m0 0a2 2 0 100 4 2 2 0 000-4zm10 0a2 2 0 100 4 2 2 0 000-4z"/>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">Carrinho vazio</h3>
+        <p class="mt-1 text-sm text-gray-500">Adicione produtos ao seu carrinho para começar.</p>
+        <div class="mt-6">
+            <a href="{% url 'catalog:home' %}" class="btn-pmcell">
+                Ver Catálogo
+            </a>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function cartManager() {
+    return {
+        cartItems: [],
+        cartTotal: 0,
+        loading: true,
+
+        async loadCart() {
+            this.loading = true;
+            const cart = JSON.parse(localStorage.getItem('pmcell_cart') || '[]');
+            
+            if (cart.length === 0) {
+                this.cartItems = [];
+                this.cartTotal = 0;
+                this.loading = false;
+                return;
+            }
+            
+            try {
+                // Fetch full product data from API
+                const response = await fetch('/api/get-cart-items/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': this.getCSRFToken(),
+                    },
+                    body: JSON.stringify({ cart })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    this.cartItems = data.items || [];
+                } else {
+                    console.error('Failed to fetch cart items');
+                    this.cartItems = [];
+                }
+            } catch (error) {
+                console.error('Error loading cart:', error);
+                this.cartItems = [];
+            }
+            
+            this.calculateTotal();
+            this.loading = false;
+        },
+
+        async updateQuantity(cartKey, newQuantity) {
+            if (newQuantity <= 0) {
+                this.removeItem(cartKey);
+                return;
+            }
+
+            const cart = JSON.parse(localStorage.getItem('pmcell_cart') || '[]');
+            const item = cart.find(item => item.key === cartKey);
+            
+            if (item) {
+                item.quantity = newQuantity;
+                localStorage.setItem('pmcell_cart', JSON.stringify(cart));
+                await this.loadCart(); // Reload to get updated prices
+                
+                // Update global cart count
+                document.dispatchEvent(new CustomEvent('cart:updated', {
+                    detail: { count: this.getTotalItems() }
+                }));
+            }
+        },
+
+        async removeItem(cartKey) {
+            const cart = JSON.parse(localStorage.getItem('pmcell_cart') || '[]');
+            const filtered = cart.filter(item => item.key !== cartKey);
+            
+            localStorage.setItem('pmcell_cart', JSON.stringify(filtered));
+            await this.loadCart();
+            
+            // Update global cart count
+            document.dispatchEvent(new CustomEvent('cart:updated', {
+                detail: { count: this.getTotalItems() }
+            }));
+        },
+
+        calculateTotal() {
+            this.cartTotal = this.cartItems.reduce((total, item) => {
+                return total + (item.unitPrice * item.quantity);
+            }, 0);
+        },
+
+        getTotalItems() {
+            return this.cartItems.reduce((total, item) => total + item.quantity, 0);
+        },
+
+        formatPrice(price) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+                minimumFractionDigits: 2
+            }).format(price);
+        },
+
+        getCSRFToken() {
+            return document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                   document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        },
+
+        proceedToCheckout() {
+            if (this.cartItems.length === 0) {
+                alert('Carrinho vazio!');
+                return;
+            }
+            
+            window.location.href = '{% url "catalog:checkout" %}';
+        }
+    }
+}
+</script>
+{% endblock %}

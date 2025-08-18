@@ -1,0 +1,317 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Finalizar Pedido - PMCELL{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8" x-data="checkoutManager()" x-init="loadCartSummary()">
+    
+    <h1 class="text-2xl font-bold text-gray-900 mb-8">Finalizar Pedido</h1>
+
+    <!-- Loading State -->
+    <div x-show="loading" class="text-center py-12">
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
+        <p class="mt-2 text-gray-600">Carregando dados do pedido...</p>
+    </div>
+
+    <!-- Empty Cart Warning -->
+    <div x-show="!loading && cartItems.length === 0" class="text-center py-12">
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+            <h3 class="text-lg font-medium text-yellow-800 mb-2">Carrinho Vazio</h3>
+            <p class="text-yellow-700 mb-4">Você precisa adicionar produtos ao carrinho antes de finalizar o pedido.</p>
+            <a href="{% url 'catalog:home' %}" class="btn-pmcell">Ver Catálogo</a>
+        </div>
+    </div>
+
+    <!-- Checkout Form -->
+    <div x-show="!loading && cartItems.length > 0" style="display: none;" class="bg-white rounded-lg shadow-md p-6">
+        <form @submit.prevent="submitOrder()">
+            {% csrf_token %}
+            
+            <!-- Client Info -->
+            <div class="mb-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Dados do Cliente</h2>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label for="nome_cliente" class="block text-sm font-medium text-gray-700 mb-2">
+                            Nome do Cliente <span class="text-gray-500">(opcional)</span>
+                        </label>
+                        <input type="text" 
+                               id="nome_cliente" 
+                               name="nome_cliente"
+                               x-model="form.nomeCliente"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                               placeholder="Digite o nome completo">
+                    </div>
+
+                    <div>
+                        <label for="whatsapp" class="block text-sm font-medium text-gray-700 mb-2">
+                            WhatsApp <span class="text-red-500">*</span>
+                        </label>
+                        <input type="tel" 
+                               id="whatsapp" 
+                               name="whatsapp"
+                               x-model="form.whatsapp"
+                               x-init="form.whatsapp = getCookie('user_whatsapp') || ''"
+                               @input="validateWhatsApp()"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                               :class="{'border-red-500': errors.whatsapp}"
+                               placeholder="(11) 99999-9999"
+                               required>
+                        <p x-show="errors.whatsapp" x-text="errors.whatsapp" class="mt-1 text-sm text-red-600"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                <h3 class="font-medium text-gray-900 mb-4">Resumo do Pedido</h3>
+                
+                <!-- Cart Items Summary -->
+                <div class="space-y-3 mb-4">
+                    <template x-for="item in cartItems" :key="item.key">
+                        <div class="flex justify-between items-center">
+                            <div class="flex-1">
+                                <p class="font-medium text-sm" x-text="item.name"></p>
+                                <p class="text-xs text-gray-500">
+                                    <span x-text="'Qtd: ' + item.quantity"></span>
+                                    <span x-show="item.modelName" x-text="' • ' + item.modelName"></span>
+                                    <span x-show="item.isSuperAtacado" class="text-blue-600"> • Super Atacado</span>
+                                </p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-medium text-sm" x-text="formatPrice(item.unitPrice * item.quantity)"></p>
+                                <p class="text-xs text-gray-500" x-text="formatPrice(item.unitPrice) + ' cada'"></p>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                
+                <!-- Total -->
+                <div class="border-t pt-3 flex justify-between items-center">
+                    <span class="font-bold text-lg">Total:</span>
+                    <span class="font-bold text-xl text-orange-600" x-text="formatPrice(cartTotal)"></span>
+                </div>
+                
+                <p class="text-xs text-gray-500 mt-2">
+                    <span x-text="getTotalItems()"></span> item(s) • 
+                    Preços já incluem desconto atacado/super atacado
+                </p>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex gap-4">
+                <a href="{% url 'catalog:cart' %}" 
+                   class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded-lg text-center font-medium transition-colors">
+                    Voltar ao Carrinho
+                </a>
+                <button type="submit" 
+                        :disabled="submitting || !isFormValid()"
+                        class="flex-1 btn-pmcell px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span x-show="!submitting">Confirmar Pedido</span>
+                    <span x-show="submitting" class="flex items-center justify-center">
+                        <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Processando...
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function checkoutManager() {
+    return {
+        loading: true,
+        submitting: false,
+        cartItems: [],
+        cartTotal: 0,
+        
+        form: {
+            nomeCliente: '',
+            whatsapp: ''
+        },
+        
+        errors: {
+            whatsapp: null
+        },
+
+        async loadCartSummary() {
+            this.loading = true;
+            const cart = JSON.parse(localStorage.getItem('pmcell_cart') || '[]');
+            
+            if (cart.length === 0) {
+                this.cartItems = [];
+                this.cartTotal = 0;
+                this.loading = false;
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/get-cart-items/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': this.getCSRFToken(),
+                    },
+                    body: JSON.stringify({ cart })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    this.cartItems = data.items || [];
+                    this.calculateTotal();
+                    
+                    // Track checkout initiated
+                    setTimeout(() => {
+                        trackCheckoutInitiated();
+                    }, 100);
+                } else {
+                    console.error('Failed to fetch cart items');
+                    this.cartItems = [];
+                }
+            } catch (error) {
+                console.error('Error loading cart:', error);
+                this.cartItems = [];
+            }
+            
+            this.loading = false;
+        },
+
+        calculateTotal() {
+            this.cartTotal = this.cartItems.reduce((total, item) => {
+                return total + (item.unitPrice * item.quantity);
+            }, 0);
+        },
+
+        getTotalItems() {
+            return this.cartItems.reduce((total, item) => total + item.quantity, 0);
+        },
+
+        validateWhatsApp() {
+            const cleaned = this.cleanWhatsAppNumber(this.form.whatsapp);
+            
+            if (!this.form.whatsapp.trim()) {
+                this.errors.whatsapp = 'WhatsApp é obrigatório';
+                return false;
+            }
+            
+            if (!this.validateWhatsAppNumber(cleaned)) {
+                this.errors.whatsapp = 'WhatsApp inválido. Use formato: (XX) XXXXX-XXXX';
+                return false;
+            }
+            
+            this.errors.whatsapp = null;
+            return true;
+        },
+
+        isFormValid() {
+            return this.form.whatsapp.trim() && !this.errors.whatsapp && this.cartItems.length > 0;
+        },
+
+        async submitOrder() {
+            if (this.submitting || !this.isFormValid()) return;
+            
+            this.submitting = true;
+            
+            try {
+                const orderData = {
+                    nome_cliente: this.form.nomeCliente.trim(),
+                    whatsapp: this.cleanWhatsAppNumber(this.form.whatsapp),
+                    cart_items: this.cartItems,
+                    total: this.cartTotal
+                };
+                
+                const response = await fetch('{% url "catalog:checkout" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': this.getCSRFToken(),
+                    },
+                    body: JSON.stringify(orderData)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        // Clear cart
+                        localStorage.removeItem('pmcell_cart');
+                        
+                        // Redirect to success page
+                        window.location.href = result.redirect_url || '{% url "catalog:checkout_success" %}?order=' + result.order_code;
+                    } else {
+                        this.showNotification(result.error || 'Erro ao processar pedido', 'error');
+                    }
+                } else {
+                    this.showNotification('Erro no servidor. Tente novamente.', 'error');
+                }
+                
+            } catch (error) {
+                console.error('Order submission error:', error);
+                this.showNotification('Erro de conexão. Tente novamente.', 'error');
+            } finally {
+                this.submitting = false;
+            }
+        },
+
+        // Utility functions
+        cleanWhatsAppNumber(number) {
+            return number.replace(/\D/g, '');
+        },
+
+        validateWhatsAppNumber(number) {
+            if (number.length < 10 || number.length > 11) return false;
+            
+            const ddd = parseInt(number.substring(0, 2));
+            if (ddd < 11 || ddd > 99) return false;
+            
+            if (number.length === 11 && number[2] !== '9') return false;
+            
+            return true;
+        },
+
+        formatPrice(price) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+                minimumFractionDigits: 2
+            }).format(price);
+        },
+
+        getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        },
+
+        getCSRFToken() {
+            return document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                   document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        },
+
+        showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg text-white font-medium fade-in ${
+                type === 'success' ? 'bg-green-500' : 
+                type === 'error' ? 'bg-red-500' : 
+                'bg-blue-500'
+            }`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
+        }
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,276 @@
+/* PMCELL Catalog Custom Styles */
+
+/* PMCELL Brand Colors */
+:root {
+    --pmcell-orange: #FF6B35;
+    --pmcell-orange-light: #FF8A5B;
+    --pmcell-orange-dark: #E55100;
+    --pmcell-green: #4CAF50;
+    --pmcell-blue: #2196F3;
+    --pmcell-gray-light: #F5F5F5;
+    --pmcell-gray-medium: #9E9E9E;
+    --pmcell-gray-dark: #424242;
+}
+
+/* Custom animations and transitions */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+@keyframes bounce {
+    0%, 20%, 53%, 80%, 100% { transform: translateY(0); }
+    40%, 43% { transform: translateY(-6px); }
+    70% { transform: translateY(-3px); }
+    90% { transform: translateY(-1px); }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.slide-down {
+    animation: slideDown 0.3s ease-out;
+}
+
+.slide-in-right {
+    animation: slideInRight 0.4s ease-out;
+}
+
+.animate-pulse {
+    animation: pulse 2s infinite;
+}
+
+.animate-bounce {
+    animation: bounce 1s;
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+    transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+/* PMCELL Custom Components */
+.btn-pmcell {
+    @apply bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200;
+    background-color: var(--pmcell-orange);
+}
+
+.btn-pmcell:hover {
+    background-color: var(--pmcell-orange-dark);
+}
+
+.btn-success {
+    @apply bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+.btn-info {
+    @apply bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+/* Card styles with enhanced animations */
+.product-card {
+    @apply bg-white rounded-lg shadow-md overflow-hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(0);
+}
+
+.product-card:hover {
+    @apply shadow-xl;
+    transform: translateY(-4px) scale(1.02);
+}
+
+.product-card img {
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover img {
+    transform: scale(1.05);
+}
+
+/* Price blur effect for locked prices */
+.price-blurred {
+    filter: blur(4px);
+    user-select: none;
+    pointer-events: none;
+}
+
+/* Modal overlay */
+.modal-overlay {
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+}
+
+/* WhatsApp input styling */
+.whatsapp-input {
+    @apply border-2 border-gray-300 rounded-lg px-4 py-2 text-lg focus:border-green-500 focus:outline-none transition-colors;
+}
+
+/* Loader */
+.loader {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid var(--pmcell-orange);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Cart badge */
+.cart-badge {
+    @apply absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center;
+}
+
+/* Search bar */
+.search-bar {
+    @apply w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none transition-colors;
+}
+
+/* Category filters */
+.category-btn {
+    @apply px-4 py-2 rounded-full text-sm font-medium transition-colors border;
+}
+
+.category-btn-active {
+    @apply bg-orange-500 text-white border-orange-500;
+    background-color: var(--pmcell-orange);
+}
+
+.category-btn-inactive {
+    @apply bg-white text-gray-700 border-gray-300 hover:border-orange-300;
+}
+
+/* Quantity controls with animations */
+.quantity-btn {
+    @apply w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-lg font-bold transition-all duration-200;
+    transform: scale(1);
+}
+
+.quantity-btn:hover {
+    @apply bg-gray-100 border-gray-400;
+    transform: scale(1.1);
+}
+
+.quantity-btn:active {
+    transform: scale(0.95);
+    transition-duration: 0.1s;
+}
+
+/* Price ranges for capas/películas */
+.price-range {
+    @apply text-sm text-gray-600 font-medium;
+}
+
+/* Responsive image container */
+.img-container {
+    @apply relative overflow-hidden;
+    padding-bottom: 75%; /* 4:3 aspect ratio */
+}
+
+.img-container img {
+    @apply absolute top-0 left-0 w-full h-full object-cover;
+}
+
+/* Mobile-first responsive classes */
+@media (max-width: 640px) {
+    .grid-products {
+        @apply grid grid-cols-2 gap-4;
+    }
+}
+
+@media (min-width: 641px) {
+    .grid-products {
+        @apply grid grid-cols-3 gap-6;
+    }
+}
+
+@media (min-width: 1024px) {
+    .grid-products {
+        @apply grid grid-cols-4 gap-6;
+    }
+}
+
+/* HTMX loading states */
+.htmx-indicator {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.htmx-request .htmx-indicator {
+    opacity: 1;
+}
+
+.htmx-request.htmx-indicator {
+    opacity: 1;
+}
+
+/* Enhanced loading states */
+.loading-overlay {
+    @apply fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50;
+    backdrop-filter: blur(1px);
+}
+
+.loading-spinner {
+    @apply w-8 h-8 border-4 border-orange-200 border-t-orange-500 rounded-full;
+    animation: spin 1s linear infinite;
+}
+
+/* Notification animations */
+.notification-enter {
+    animation: slideInRight 0.3s ease-out;
+}
+
+.notification-exit {
+    animation: fadeOut 0.3s ease-out forwards;
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(100px); }
+}
+
+/* Cart counter animation */
+.cart-counter-update {
+    animation: bounce 0.6s ease-out;
+}
+
+/* Button press animations */
+.btn-press {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+}
+
+/* Search suggestions dropdown */
+.suggestions-dropdown {
+    @apply absolute top-full left-0 right-0 bg-white shadow-lg rounded-b-lg border-t border-gray-200 z-10;
+    animation: slideDown 0.2s ease-out;
+    transform-origin: top;
+}
+
+.suggestion-item {
+    @apply px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0;
+}
+
+.suggestion-item:hover {
+    @apply bg-orange-50;
+}

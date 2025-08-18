@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pedido Confirmado - PMCELL{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <div class="text-center mb-8">
+        <!-- Success Icon -->
+        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
+            <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+        </div>
+        
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Pedido Confirmado!</h1>
+        <p class="text-lg text-gray-600">Seu pedido foi registrado com sucesso.</p>
+    </div>
+
+    {% if order_code %}
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="text-center">
+            <h2 class="text-lg font-semibold text-gray-900 mb-2">Código do Pedido</h2>
+            <div class="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
+                <p class="text-2xl font-bold text-orange-600">{{ order_code }}</p>
+                <p class="text-sm text-gray-600 mt-1">Anote ou tire um print deste código</p>
+            </div>
+        </div>
+        
+        {% if pedido %}
+        <div class="border-t pt-4">
+            <h3 class="font-medium text-gray-900 mb-3">Resumo do Pedido</h3>
+            
+            <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Cliente:</span>
+                    <span class="font-medium">{{ pedido.nome_cliente }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">WhatsApp:</span>
+                    <span class="font-medium">{{ pedido.whatsapp }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Total:</span>
+                    <span class="font-bold text-lg text-orange-600">R$ {{ pedido.valor_total|floatformat:2 }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-600">Status:</span>
+                    <span class="font-medium text-yellow-600">{{ pedido.get_status_display }}</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+        <h3 class="font-medium text-blue-900 mb-2">O que acontece agora?</h3>
+        <ul class="text-sm text-blue-800 space-y-1">
+            <li>• Nossa equipe recebeu seu pedido e entrará em contato via WhatsApp</li>
+            <li>• Confirmaremos os produtos e valores</li>
+            <li>• Enviaremos informações sobre pagamento e entrega</li>
+            <li>• Você receberá atualizações do status do pedido</li>
+        </ul>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-4">
+        <a href="{% url 'catalog:home' %}" 
+           class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded-lg text-center font-medium transition-colors">
+            Voltar ao Catálogo
+        </a>
+        <button onclick="window.print()" 
+                class="flex-1 btn-pmcell px-6 py-3">
+            Imprimir Comprovante
+        </button>
+    </div>
+
+</div>
+
+<style>
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    .print-area, .print-area * {
+        visibility: visible;
+    }
+    .print-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+    .no-print {
+        display: none !important;
+    }
+}
+</style>
+{% endblock %}

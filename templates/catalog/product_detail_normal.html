@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.nome }} - PMCELL{% endblock %}
+
+{% block meta_description %}{{ product.descricao|truncatewords:20 }} - Acessório para celular no atacado da PMCELL.{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Breadcrumb -->
+    <nav class="mb-6">
+        <ol class="flex items-center space-x-2 text-sm text-gray-500">
+            <li><a href="{% url 'catalog:home' %}" class="hover:text-orange-500">Início</a></li>
+            <li><span class="mx-2">›</span></li>
+            <li><a href="{% url 'catalog:home' %}?category={{ product.categoria.slug }}" class="hover:text-orange-500">{{ product.categoria.nome }}</a></li>
+            <li><span class="mx-2">›</span></li>
+            <li class="text-gray-900 font-medium">{{ product.nome }}</li>
+        </ol>
+    </nav>
+
+    <!-- Product Detail -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        <!-- Product Images -->
+        <div class="space-y-4">
+            <!-- Main Image -->
+            <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden" x-data="{ currentImage: 0 }">
+                <div class="relative h-full">
+                    {% for image in product.imagemproduto_set.all %}
+                    <img x-show="currentImage === {{ forloop.counter0 }}" 
+                         src="{{ image.imagem.url }}" 
+                         alt="{{ product.nome }} - Imagem {{ forloop.counter }}"
+                         class="w-full h-full object-cover"
+                         style="display: {% if forloop.first %}block{% else %}none{% endif %};">
+                    {% empty %}
+                    <div class="flex items-center justify-center h-full">
+                        <svg class="w-24 h-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    {% endfor %}
+
+                    <!-- Navigation Arrows -->
+                    {% if product.imagemproduto_set.count > 1 %}
+                    <button @click="currentImage = currentImage === 0 ? {{ product.imagemproduto_set.count|add:"-1" }} : currentImage - 1"
+                            class="absolute left-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-75 hover:bg-opacity-100 rounded-full p-2 transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </button>
+                    <button @click="currentImage = currentImage === {{ product.imagemproduto_set.count|add:"-1" }} ? 0 : currentImage + 1"
+                            class="absolute right-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-75 hover:bg-opacity-100 rounded-full p-2 transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Thumbnail Images -->
+            {% if product.imagemproduto_set.count > 1 %}
+            <div class="flex space-x-2 overflow-x-auto" x-data="{ currentImage: 0 }">
+                {% for image in product.imagemproduto_set.all %}
+                <button @click="currentImage = {{ forloop.counter0 }}"
+                        :class="currentImage === {{ forloop.counter0 }} ? 'ring-2 ring-orange-500' : 'ring-1 ring-gray-300'"
+                        class="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden">
+                    <img src="{{ image.imagem.url }}" 
+                         alt="{{ product.nome }} - Thumb {{ forloop.counter }}"
+                         class="w-full h-full object-cover">
+                </button>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Product Information -->
+        <div class="space-y-6">
+            
+            <!-- Title and Category -->
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ product.nome }}</h1>
+                <span class="inline-block bg-gray-100 text-gray-800 text-sm px-3 py-1 rounded-full">
+                    {{ product.categoria.nome }}
+                </span>
+            </div>
+
+            <!-- Description -->
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Descrição</h3>
+                <p class="text-gray-600 leading-relaxed">{{ product.descricao }}</p>
+            </div>
+
+            <!-- Specifications -->
+            {% if product.fabricante %}
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Especificações</h3>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <span class="text-sm font-medium text-gray-500">Fabricante:</span>
+                            <span class="ml-2 text-sm text-gray-900">{{ product.fabricante }}</span>
+                        </div>
+                        {% if product.caracteristicas %}
+                        <div class="col-span-full">
+                            <span class="text-sm font-medium text-gray-500">Características:</span>
+                            <span class="ml-2 text-sm text-gray-900">{{ product.caracteristicas }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Pricing and Purchase -->
+            <div class="border-t pt-6" x-data="{ quantity: 1 }">
+                
+                <!-- Price Display -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">Preços</h3>
+                    <div class="price" :class="pricesUnlocked ? '' : 'price-blurred'">
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-green-800 font-medium">Preço Atacado</span>
+                                <span class="text-2xl font-bold text-green-600">
+                                    R$ {{ product.preco_atacado|floatformat:2 }}
+                                </span>
+                            </div>
+                            <p class="text-green-700 text-sm mt-1">A partir de 1 unidade</p>
+                        </div>
+                        
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-blue-800 font-medium">Preço Super Atacado</span>
+                                <span class="text-2xl font-bold text-blue-600">
+                                    R$ {{ product.preco_super_atacado|floatformat:2 }}
+                                </span>
+                            </div>
+                            <p class="text-blue-700 text-sm mt-1">A partir de {{ product.qtd_min_super_atacado }} unidades</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quantity Selector and Price Calculator -->
+                <div x-show="pricesUnlocked" class="space-y-4" style="display: none;">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Quantidade</label>
+                        <div class="flex items-center space-x-3">
+                            <button @click="quantity = Math.max(1, quantity - 1)" 
+                                    class="quantity-btn">-</button>
+                            <input x-model="quantity" 
+                                   type="number" 
+                                   min="1" 
+                                   class="w-20 text-center border border-gray-300 rounded-lg px-3 py-2 font-medium">
+                            <button @click="quantity = quantity + 1" 
+                                    class="quantity-btn">+</button>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Price Calculation -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex items-center justify-between">
+                            <span class="font-medium text-gray-900">
+                                Total para <span x-text="quantity"></span> unidade<span x-show="quantity > 1">s</span>:
+                            </span>
+                            <span class="text-xl font-bold" 
+                                  :class="quantity >= {{ product.qtd_min_super_atacado }} ? 'text-blue-600' : 'text-green-600'">
+                                R$ <span x-text="(quantity >= {{ product.qtd_min_super_atacado }} ? {{ product.preco_super_atacado }} * quantity : {{ product.preco_atacado }} * quantity).toFixed(2)"></span>
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-1" 
+                           x-text="quantity >= {{ product.qtd_min_super_atacado }} ? 'Preço super atacado aplicado!' : (quantity > 1 ? 'Mais ' + ({{ product.qtd_min_super_atacado }} - quantity) + ' unidade(s) para super atacado' : 'Preço atacado')"></p>
+                    </div>
+
+                    <!-- Add to Cart Button -->
+                    <button @click="addToCart({{ product.id }}, 'normal', quantity)"
+                            class="w-full btn-pmcell py-4 text-lg font-semibold">
+                        🛒 Adicionar ao Carrinho
+                    </button>
+                </div>
+
+                <!-- Unlock Prices Button -->
+                <div x-show="!pricesUnlocked" style="display: none;">
+                    <button @click="requestPriceUnlock()" 
+                            class="w-full bg-gray-300 hover:bg-gray-400 text-gray-700 py-4 rounded-lg text-lg font-semibold transition-colors">
+                        🔒 Liberar Preços para Comprar
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    <div class="mt-16">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">Produtos Relacionados</h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" 
+             hx-get="{% url 'catalog:home' %}?category={{ product.categoria.slug }}&limit=4&exclude={{ product.id }}"
+             hx-trigger="load"
+             hx-swap="innerHTML">
+            <!-- Loading placeholder -->
+            <div class="animate-pulse">
+                <div class="bg-gray-200 aspect-square rounded-lg mb-2"></div>
+                <div class="bg-gray-200 h-4 rounded mb-1"></div>
+                <div class="bg-gray-200 h-3 rounded w-3/4"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Track product view
+document.addEventListener('DOMContentLoaded', function() {
+    const whatsapp = getCookie('user_whatsapp');
+    if (whatsapp) {
+        fetch('/api/track-visit/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            },
+            body: JSON.stringify({
+                page: 'product_detail',
+                product_id: {{ product.id }},
+                product_type: 'normal',
+                product_name: '{{ product.nome|escapejs }}',
+                timestamp: new Date().toISOString()
+            })
+        }).catch(err => console.log('Tracking error:', err));
+    }
+});
+
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+}
+</script>
+{% endblock %}

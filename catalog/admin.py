@@ -6,6 +6,7 @@ from .models import (
     MarcaCelular, ModeloCelular, PrecoModelo, Pedido, ItemPedido,
     CarrinhoAbandonado, JornadaCliente, ConfiguracaoWebhook, ConfiguracaoGeral
 )
+from .cache_utils import CacheInvalidationMixin
 
 
 @admin.register(User)
@@ -21,7 +22,7 @@ class CustomUserAdmin(UserAdmin):
 
 
 @admin.register(Categoria)
-class CategoriaAdmin(admin.ModelAdmin):
+class CategoriaAdmin(CacheInvalidationMixin, admin.ModelAdmin):
     list_display = ('nome', 'slug', 'ativo', 'ordem', 'created_at')
     list_filter = ('ativo', 'created_at')
     search_fields = ('nome', 'descricao')
@@ -36,7 +37,7 @@ class ImagemProdutoInline(admin.TabularInline):
 
 
 @admin.register(ProdutoNormal)
-class ProdutoNormalAdmin(admin.ModelAdmin):
+class ProdutoNormalAdmin(CacheInvalidationMixin, admin.ModelAdmin):
     list_display = ('nome', 'categoria', 'preco_atacado', 'preco_super_atacado', 'em_estoque', 'destaque')
     list_filter = ('categoria', 'em_estoque', 'destaque', 'created_at')
     search_fields = ('nome', 'descricao', 'fabricante')
@@ -62,7 +63,7 @@ class PrecoModeloInline(admin.TabularInline):
 
 
 @admin.register(ProdutoCapaPelicula)
-class ProdutoCapaPeliculaAdmin(admin.ModelAdmin):
+class ProdutoCapaPeliculaAdmin(CacheInvalidationMixin, admin.ModelAdmin):
     list_display = ('nome', 'categoria', 'get_range_precos_display', 'em_estoque', 'destaque')
     list_filter = ('categoria', 'em_estoque', 'destaque', 'created_at')
     search_fields = ('nome', 'descricao', 'fabricante')

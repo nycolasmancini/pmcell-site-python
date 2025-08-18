@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}PMCELL - Catálogo B2B de Acessórios para Celular no Atacado{% endblock %}
+
+{% block meta_description %}Catálogo B2B PMCELL com acessórios para celular no atacado. Capas, películas, carregadores, cabos e muito mais com preços especiais para seu negócio.{% endblock %}
+
+{% block meta_keywords %}pmcell, atacado celular, acessórios celular b2b, capas atacado, películas atacado, carregadores atacado, cabos celular, preços atacado{% endblock %}
+
+{% block schema_type %}WebSite{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Hero Section (only show when no search/filter) -->
+    {% if not search_query and category_filter == 'all' %}
+    <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg text-white p-8 mb-8">
+        <div class="max-w-3xl">
+            <h1 class="text-3xl font-bold mb-4">
+                Bem-vindo ao Catálogo PMCELL
+            </h1>
+            <p class="text-lg opacity-90 mb-6">
+                Acessórios para celular no atacado com os melhores preços. 
+                Libere os preços com seu WhatsApp e comece a comprar!
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4">
+                <button x-show="!pricesUnlocked" 
+                        @click="requestPriceUnlock()"
+                        class="bg-white text-orange-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                    🔓 Liberar Preços
+                </button>
+                <div x-show="pricesUnlocked" 
+                     class="bg-green-500 px-6 py-3 rounded-lg font-semibold flex items-center"
+                     style="display: none;">
+                    ✅ Preços Liberados
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Search Results Header and Filters -->
+    {% if search_query or category_filter != 'all' or total_products > 0 %}
+    <div class="mb-6">
+        <!-- Results Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 mb-2">
+                    {% if search_query %}
+                        Resultados para "{{ search_query }}"
+                    {% elif category_filter != 'all' %}
+                        {% for category in categories %}
+                            {% if category.slug == category_filter %}
+                                {{ category.nome }}
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        Todos os Produtos
+                    {% endif %}
+                </h1>
+                <p class="text-gray-600">
+                    {{ total_products }} produto{{ total_products|pluralize }} encontrado{{ total_products|pluralize }}
+                </p>
+            </div>
+            
+            <!-- Sort Controls -->
+            <div class="mt-4 sm:mt-0">
+                <div class="flex items-center space-x-2">
+                    <label for="sort-select" class="text-sm text-gray-600 whitespace-nowrap">Ordenar por:</label>
+                    <select id="sort-select" 
+                            x-model="sortBy"
+                            @change="htmx.trigger('#search-form', 'submit')"
+                            class="text-sm border border-gray-300 rounded-lg px-3 py-1 bg-white focus:border-orange-500 focus:outline-none">
+                        <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Nome A-Z</option>
+                        <option value="name_desc" {% if sort_by == 'name_desc' %}selected{% endif %}>Nome Z-A</option>
+                        <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Menor Preço</option>
+                        <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Maior Preço</option>
+                        <option value="category" {% if sort_by == 'category' %}selected{% endif %}>Categoria</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Products Grid Container -->
+    <div id="products-grid">
+        {% include 'catalog/products_grid.html' %}
+    </div>
+
+    <!-- No Results -->
+    {% if page_obj.paginator.count == 0 %}
+    <div class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.469.787-6.172 2.172.395-.636.898-1.234 1.507-1.781A6.001 6.001 0 0112 13a6.001 6.001 0 014.665 2.391c.608.547 1.112 1.145 1.507 1.781z"/>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">Nenhum produto encontrado</h3>
+        <p class="mt-1 text-sm text-gray-500">
+            {% if search_query %}
+                Tente pesquisar por outros termos ou categorias.
+            {% else %}
+                Não há produtos disponíveis nesta categoria no momento.
+            {% endif %}
+        </p>
+        {% if search_query or category_filter != 'all' %}
+        <div class="mt-6">
+            <button @click="searchQuery = ''; selectedCategory = 'all'; htmx.trigger('#search-form', 'submit')"
+                    class="btn-pmcell">
+                Ver Todos os Produtos
+            </button>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Track page visit and category if applicable
+document.addEventListener('DOMContentLoaded', function() {
+    // Track category visit if filtering by specific category
+    {% if category_filter != 'all' %}
+        {% for category in categories %}
+            {% if category.slug == category_filter %}
+                setTimeout(() => {
+                    const app = Alpine.$data(document.querySelector('[x-data="pmcellApp()"]'));
+                    if (app) {
+                        app.trackCategoryVisit('{{ category.slug|escapejs }}', '{{ category.nome|escapejs }}');
+                    }
+                }, 100);
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+});
+</script>
+{% endblock %}

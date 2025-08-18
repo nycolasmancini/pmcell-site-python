@@ -1,0 +1,45 @@
+<!-- Models List for selected brand (HTMX partial) -->
+<div class="space-y-3">
+    <label class="block text-sm font-medium text-gray-700">Modelos - {{ marca.nome }}</label>
+    
+    {% if modelos %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-60 overflow-y-auto">
+        {% for modelo in modelos %}
+        {% with preco=modelo.precomodelo_set.first %}
+        <button @click="selectedModelo = {{ modelo.id }}; currentPrice = { atacado: {{ preco.preco_atacado }}, super: {{ preco.preco_super_atacado }} }; document.getElementById('selected-model-info').innerHTML = `
+                <div class='flex justify-between items-center'>
+                    <div>
+                        <div class='font-medium text-orange-900'>{{ marca.nome }} {{ modelo.nome }}</div>
+                        <div class='text-sm text-orange-700'>
+                            Atacado: R$ {{ preco.preco_atacado|floatformat:2 }} | 
+                            Super: R$ {{ preco.preco_super_atacado|floatformat:2 }}
+                        </div>
+                    </div>
+                    <button onclick='this.closest(\\\`.border-t\\\`).querySelector(\\\`[x-data]\\\`).__x.$data.selectedModelo = null; this.closest(\\\`.border-t\\\`).querySelector(\\\`[x-data]\\\`).__x.$data.currentPrice = null' 
+                            class='text-orange-600 hover:text-orange-800 text-sm'>✕ Trocar</button>
+                </div>
+            `"
+                :class="selectedModelo === {{ modelo.id }} ? 'bg-orange-500 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'"
+                class="px-4 py-3 rounded-lg text-left transition-colors">
+            <div class="font-medium">{{ modelo.nome }}</div>
+            <div class="text-sm opacity-75">
+                R$ {{ preco.preco_atacado|floatformat:2 }} / R$ {{ preco.preco_super_atacado|floatformat:2 }}
+            </div>
+        </button>
+        {% endwith %}
+        {% endfor %}
+    </div>
+    
+    <p class="text-xs text-gray-500 mt-2">
+        💡 Preços: Atacado / Super Atacado ({{ product.qtd_min_super_atacado }}+ unidades)
+    </p>
+    
+    {% else %}
+    <div class="text-center py-6 text-gray-500">
+        <svg class="mx-auto h-8 w-8 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"/>
+        </svg>
+        <p class="text-sm">Nenhum modelo disponível para esta marca.</p>
+    </div>
+    {% endif %}
+</div>

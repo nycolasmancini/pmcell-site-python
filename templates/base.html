@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_description %}PMCELL - Catálogo B2B de acessórios para celular. Compre no atacado com os melhores preços. Capas, películas, carregadores, cabos e muito mais.{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}pmcell, acessórios celular, atacado, capas, películas, carregadores, cabos, b2b, preços atacado{% endblock %}">
+    <meta name="author" content="PMCELL">
+    <meta name="robots" content="{% block robots %}index, follow{% endblock %}">
+    <meta name="theme-color" content="#FF6B35">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="{% block canonical_url %}{{ request.build_absolute_uri }}{% endblock %}">
+    
+    <title>{% block title %}PMCELL - Catálogo B2B{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% load static %}{% static 'images/favicon.ico' %}">
+    
+    <!-- Tailwind CSS CDN for rapid development -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Configure Tailwind with PMCELL colors -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'pmcell': {
+                            'orange': '#FF6B35',
+                            'orange-light': '#FF8A5B',
+                            'orange-dark': '#E55100',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    
+    <!-- Custom CSS -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    
+    <!-- Additional CSS -->
+    {% block extra_css %}{% endblock %}
+    
+    <!-- CSRF Token for HTMX -->
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="{% block og_title %}PMCELL - Catálogo B2B{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}PMCELL - Catálogo B2B de acessórios para celular. Compre no atacado com os melhores preços. Capas, películas, carregadores, cabos e muito mais.{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{% load static %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/og-image.jpg' %}{% endblock %}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:url" content="{% block og_url %}{{ request.build_absolute_uri }}{% endblock %}">
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:site_name" content="PMCELL">
+    <meta property="og:locale" content="pt_BR">
+    
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% block twitter_title %}PMCELL - Catálogo B2B{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}PMCELL - Catálogo B2B de acessórios para celular. Compre no atacado com os melhores preços. Capas, películas, carregadores, cabos e muito mais.{% endblock %}">
+    <meta name="twitter:image" content="{% block twitter_image %}{% load static %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/og-image.jpg' %}{% endblock %}">
+    
+    <!-- Schema.org JSON-LD -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "{% block schema_type %}WebSite{% endblock %}",
+        "name": "PMCELL",
+        "description": "PMCELL - Catálogo B2B de acessórios para celular. Compre no atacado com os melhores preços. Capas, películas, carregadores, cabos e muito mais.",
+        "url": "{{ request.build_absolute_uri }}",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "{{ request.scheme }}://{{ request.get_host }}{% url 'catalog:home' %}?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+</head>
+
+<body class="h-full bg-gray-50" x-data="pmcellApp()" x-init="init()">
+    <!-- CSRF Token for forms -->
+    {% csrf_token %}
+    
+    <!-- Loading Overlay -->
+    <div x-show="isLoading" x-transition:enter="transition ease-out duration-300" 
+         x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200" 
+         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+         style="display: none;">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <div class="loader mx-auto mb-4"></div>
+            <p class="text-gray-600 text-center">Carregando...</p>
+        </div>
+    </div>
+
+    <!-- WhatsApp Modal for Price Liberation -->
+    <div x-show="showWhatsAppModal" x-transition:enter="transition ease-out duration-300" 
+         x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200" 
+         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+         @click="closeModalOnClickOutside($event)"
+         class="fixed inset-0 z-40 flex items-center justify-center modal-overlay"
+         style="display: none;">
+        
+        <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6"
+             x-transition:enter="transition ease-out duration-300 transform"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="transition ease-in duration-200 transform"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95"
+             @click.stop>
+            
+            <!-- Modal Header -->
+            <div class="text-center mb-6">
+                <div class="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                    <svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.570-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.787"/>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">Libere os Preços</h3>
+                <p class="text-gray-600 mt-2">Informe seu WhatsApp para visualizar nossos preços exclusivos</p>
+            </div>
+
+            <!-- WhatsApp Form -->
+            <form @submit.prevent="submitWhatsApp()">
+                <div class="mb-4">
+                    <label for="whatsapp" class="block text-sm font-medium text-gray-700 mb-2">
+                        WhatsApp
+                    </label>
+                    <input type="tel" 
+                           id="whatsapp"
+                           x-model="whatsappNumber"
+                           x-on:input="whatsappNumber = formatWhatsAppNumber($event.target.value)"
+                           class="whatsapp-input w-full"
+                           placeholder="(11) 99999-9999"
+                           maxlength="15"
+                           required>
+                    
+                    <!-- Error message -->
+                    <p x-show="whatsappError" x-text="whatsappError" 
+                       class="text-red-500 text-sm mt-2"></p>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex gap-3">
+                    <button type="button" 
+                            @click="showWhatsAppModal = false"
+                            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="submit" 
+                            :disabled="isSubmittingWhatsApp"
+                            class="flex-1 btn-pmcell relative">
+                        <span x-show="!isSubmittingWhatsApp">Liberar Preços</span>
+                        <div x-show="isSubmittingWhatsApp" class="loader" style="display: none;"></div>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Privacy Notice -->
+            <p class="text-xs text-gray-500 text-center mt-4">
+                Seus dados são protegidos e usados apenas para atendimento comercial.
+            </p>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="min-h-full flex flex-col">
+        <!-- Header -->
+        <header class="bg-white shadow-md relative z-30">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <!-- Logo -->
+                    <div class="flex-shrink-0">
+                        <a href="{% url 'catalog:home' %}" class="flex items-center">
+                            <img class="h-10 w-auto" src="{% static 'images/pmcell-logo.png' %}" alt="PMCELL">
+                            <span class="ml-2 text-xl font-bold text-gray-900">PMCELL</span>
+                        </a>
+                    </div>
+
+                    <!-- Search Bar (Desktop) -->
+                    <div class="hidden md:block flex-1 max-w-lg mx-8">
+                        {% include 'components/search_bar.html' %}
+                    </div>
+
+                    <!-- Header Actions -->
+                    <div class="flex items-center space-x-4">
+                        <!-- Price Lock Status -->
+                        <div x-show="!pricesUnlocked" class="hidden sm:flex items-center text-orange-600">
+                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span class="text-sm font-medium">Preços Bloqueados</span>
+                        </div>
+
+                        <!-- Unlock Prices Button -->
+                        <button x-show="!pricesUnlocked" 
+                                @click="requestPriceUnlock()"
+                                class="btn-pmcell text-sm">
+                            Liberar Preços
+                        </button>
+
+                        <!-- Cart Button -->
+                        <a href="{% url 'catalog:cart' %}" 
+                           class="relative inline-flex items-center p-2 text-gray-600 hover:text-gray-900 transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M3 3h2l.4 2M7 13h10l4-8H5.4m2.6 0L9 17m0 0a2 2 0 100 4 2 2 0 000-4zm10 0a2 2 0 100 4 2 2 0 000-4z"/>
+                            </svg>
+                            
+                            <!-- Cart Badge -->
+                            <span x-show="cartCount > 0" 
+                                  x-text="cartCount" 
+                                  class="cart-badge"
+                                  style="display: none;"></span>
+                        </a>
+
+                        <!-- Admin Link (if staff) -->
+                        {% if user.is_staff %}
+                        <a href="{% url 'admin:index' %}" 
+                           class="text-gray-600 hover:text-gray-900 transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Mobile Search Bar -->
+                <div class="md:hidden pb-3">
+                    {% include 'components/search_bar.html' %}
+                </div>
+            </div>
+        </header>
+
+        <!-- Category Filter Navigation -->
+        {% block category_nav %}
+        <nav class="bg-white border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex space-x-4 py-3 overflow-x-auto">
+                    <button @click="filterByCategory('all')" 
+                            :class="selectedCategory === 'all' ? 'category-btn-active' : 'category-btn-inactive'"
+                            class="category-btn whitespace-nowrap">
+                        Todos
+                    </button>
+                    
+                    {% for category in categories %}
+                    <button @click="filterByCategory('{{ category.slug }}')" 
+                            :class="selectedCategory === '{{ category.slug }}' ? 'category-btn-active' : 'category-btn-inactive'"
+                            class="category-btn whitespace-nowrap">
+                        {{ category.nome }}
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+        </nav>
+        {% endblock %}
+
+        <!-- Main Content -->
+        <main class="flex-1 bg-gray-50" id="main-content">
+            {% block content %}
+            <!-- Page content goes here -->
+            {% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white border-t border-gray-200 mt-auto">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Company Info -->
+                    <div>
+                        <div class="flex items-center mb-4">
+                            <img class="h-8 w-auto" src="{% static 'images/pmcell-logo.png' %}" alt="PMCELL">
+                            <span class="ml-2 text-lg font-bold text-gray-900">PMCELL</span>
+                        </div>
+                        <p class="text-gray-600 text-sm">
+                            Acessórios para celular no atacado. 
+                            Qualidade, variedade e os melhores preços para seu negócio.
+                        </p>
+                    </div>
+
+                    <!-- Quick Links -->
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">
+                            Links Rápidos
+                        </h3>
+                        <ul class="space-y-2">
+                            <li><a href="{% url 'catalog:home' %}" class="text-gray-600 hover:text-gray-900 text-sm">Catálogo</a></li>
+                            <li><a href="{% url 'catalog:cart' %}" class="text-gray-600 hover:text-gray-900 text-sm">Carrinho</a></li>
+                            {% if user.is_staff %}
+                            <li><a href="{% url 'admin:index' %}" class="text-gray-600 hover:text-gray-900 text-sm">Administração</a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+
+                    <!-- Contact Info -->
+                    <div>
+                        <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">
+                            Contato
+                        </h3>
+                        <div class="space-y-2">
+                            <p class="text-gray-600 text-sm flex items-center">
+                                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.570-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.787"/>
+                                </svg>
+                                WhatsApp para pedidos
+                            </p>
+                            <p class="text-gray-600 text-sm">
+                                Atendimento comercial via WhatsApp após liberação de preços
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Copyright -->
+                <div class="border-t border-gray-200 pt-6 mt-8">
+                    <p class="text-center text-gray-500 text-sm">
+                        © {% now "Y" %} PMCELL. Todos os direitos reservados.
+                    </p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Custom JavaScript -->
+    <script src="{% static 'js/main.js' %}"></script>
+    
+    <!-- Additional JavaScript -->
+    {% block extra_js %}{% endblock %}
+
+    <!-- HTMX Configuration -->
+    <script>
+        // Configure HTMX headers
+        document.addEventListener('DOMContentLoaded', function() {
+            htmx.config.includeIndicatorStyles = false;
+            htmx.on("htmx:configRequest", function(evt) {
+                evt.detail.headers['X-CSRFToken'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            });
+        });
+    </script>
+</body>
+</html>
