@@ -42,9 +42,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
     'rest_framework',
     'cloudinary',
     'cloudinary_storage',
+    'compressor',
     'catalog',
 ]
 
@@ -141,6 +143,23 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
+# Django Compressor settings
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'compressor.finders.CompressorFinder',
+]
+
+COMPRESS_ENABLED = not DEBUG
+COMPRESS_CSS_FILTERS = [
+    'compressor.filters.css_default.CssAbsoluteFilter',
+    'compressor.filters.cssmin.rCSSMinFilter',
+]
+COMPRESS_JS_FILTERS = [
+    'compressor.filters.jsmin.rJSMinFilter',
+]
+COMPRESS_OFFLINE = True
+
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -155,6 +174,26 @@ if CLOUDINARY_URL:
         secure=True
     )
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+# Cloudinary optimization settings
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME', default=''),
+    'API_KEY': config('CLOUDINARY_API_KEY', default=''),
+    'API_SECRET': config('CLOUDINARY_API_SECRET', default=''),
+    'SECURE': True,
+    'QUALITY': 'auto:best',
+    'FETCH_FORMAT': 'auto',
+    'PROGRESSIVE': True,
+    'RESPONSIVE': True,
+    'DPR': 'auto',
+    'DEFAULTS': {
+        'width': 800,
+        'height': 600,
+        'crop': 'limit',
+        'quality': 'auto:best',
+        'format': 'auto',
+    }
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -174,6 +213,23 @@ REST_FRAMEWORK = {
     ],
 }
 
+# Cache configuration
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'pmcell-cache',
+        'TIMEOUT': 300,  # 5 minutes default timeout
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000,
+        }
+    }
+}
+
+# Cache timeouts (in seconds)
+CACHE_TIMEOUT_CATEGORIES = 3600  # 1 hour
+CACHE_TIMEOUT_PRODUCTS = 1800    # 30 minutes  
+CACHE_TIMEOUT_SEARCH = 300       # 5 minutes
+
 # Security settings for production
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
@@ -181,3 +237,29 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+    X_FRAME_OPTIONS = 'DENY'
+    
+    # Additional security settings
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_HTTPONLY = True
+    SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin'
+
+# CSRF settings
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.railway.app',
+    'https://pmcell-site-python-production-06e8.up.railway.app',
+]
+
+# Session settings
+SESSION_COOKIE_AGE = 86400  # 24 hours
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_SAVE_EVERY_REQUEST = True
+
+# Rate limiting settings
+RATE_LIMIT_ENABLE = True
+RATE_LIMIT_CACHE_PREFIX = 'pmcell_rate_limit'
