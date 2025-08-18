@@ -4,6 +4,9 @@ from . import views
 app_name = 'catalog'
 
 urlpatterns = [
+    # Health check
+    path('health/', views.health_check, name='health_check'),
+    
     # Main pages
     path('', views.home, name='home'),
     path('search/', views.search, name='search'),

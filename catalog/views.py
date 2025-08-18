@@ -679,3 +679,14 @@ def validate_whatsapp(whatsapp):
         return False
     
     return True
+
+
+def health_check(request):
+    """
+    Health check endpoint for Railway deployment
+    """
+    return JsonResponse({
+        'status': 'healthy',
+        'timestamp': request.headers.get('x-request-timestamp', ''),
+        'service': 'pmcell-catalog'
+    })
