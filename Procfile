@@ -1,2 +1,1 @@
-web: gunicorn pmcell.wsgi:application
-release: python manage.py migrate && python manage.py collectstatic --noinput
+web: python manage.py migrate && python manage.py loaddata catalog/fixtures/initial_data.json --ignore-missing && gunicorn pmcell.wsgi:application --bind 0.0.0.0:$PORT
