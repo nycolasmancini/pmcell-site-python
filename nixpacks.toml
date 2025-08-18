@@ -1,8 +1,19 @@
-[build]
-cmd = "pip install -r requirements.txt && python manage.py collectstatic --noinput"
+[phases.setup]
+nixPkgs = ['python311', 'postgresql_16']
+
+[phases.install]
+cmds = [
+    'python -m venv --copies /opt/venv',
+    '. /opt/venv/bin/activate && pip install -r requirements.txt'
+]
+
+[phases.build]
+cmds = [
+    '. /opt/venv/bin/activate && python manage.py collectstatic --noinput'
+]
 
 [start]
-cmd = "python manage.py migrate && python manage.py loaddata catalog/fixtures/initial_data.json && gunicorn pmcell.wsgi:application"
+cmd = '. /opt/venv/bin/activate && python manage.py migrate && python manage.py loaddata catalog/fixtures/initial_data.json --ignore-missing && gunicorn pmcell.wsgi:application --bind 0.0.0.0:$PORT'
 
 [variables]
-NIXPACKS_PYTHON_VERSION = "3.11"
+PATH = '/opt/venv/bin:$PATH'
